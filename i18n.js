@@ -221,7 +221,7 @@
     async function copyLanguageLink() {
       // The circle names the language it switches to, so share that language.
       const target = language === 'am' ? 'en' : 'am';
-      const url = new URL(location.pathname, location.origin);
+      const url = new URL('https://menaincet.com/binyam-bethel/');
       url.searchParams.set('lang', target);
       try {
         if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');

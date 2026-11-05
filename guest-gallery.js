@@ -18,35 +18,12 @@
   document.body.append(gallery, viewer);
 
   let photos = [];
-  const builtInPhotos = Array.from(document.querySelectorAll('#stage .slide')).map((slide, index) => ({
-    src: 'https://bereket6244.github.io/binyam-bethel-invite/images/garden-walk.webp',
-    alt: slide.getAttribute('aria-label') || 'Photo ' + (index + 1),
+  const builtInPhotos = Array.from(document.querySelectorAll('#stage [data-full]'), slide => ({
+    src: slide.dataset.full,
+    previewSrc: slide.querySelector('img').currentSrc || slide.querySelector('img').dataset.src,
+    alt: slide.getAttribute('aria-label'),
     builtIn: true
   }));
-  const builtInCrops = [[1, 0.54, 0.5], [1.7, 0.485, 0.5], [1.6, 0.565, 0.63], [2.4, 0.515, 0.6], [1.4, 0.61, 0.95], [1.5, 0.25, 0.4], [1.2, 0.78, 0.5]];
-  const cropPromises = [];
-  let sourceImagePromise;
-  function getBuiltInCrop(index) {
-    if (cropPromises[index]) return cropPromises[index];
-    if (!sourceImagePromise) sourceImagePromise = new Promise((resolve, reject) => {
-      const source = new Image();
-      source.crossOrigin = "anonymous";
-      source.onload = () => resolve(source);
-      source.onerror = () => reject(new Error('Photo unavailable'));
-      source.src = 'https://bereket6244.github.io/binyam-bethel-invite/images/garden-walk.webp';
-    });
-    cropPromises[index] = sourceImagePromise.then(source => new Promise((resolve, reject) => {
-      const [scale, x, y] = builtInCrops[index];
-      const cropHeight = source.naturalHeight / scale;
-      const cropWidth = cropHeight * .65;
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(cropWidth);
-      canvas.height = Math.round(cropHeight);
-      canvas.getContext('2d').drawImage(source, (source.naturalWidth - cropWidth) * x, (source.naturalHeight - cropHeight) * y, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => blob ? resolve(URL.createObjectURL(blob)) : reject(new Error('Photo unavailable')), 'image/jpeg', .92);
-    })).catch(error => { cropPromises[index] = null; sourceImagePromise = null; throw error; });
-    return cropPromises[index];
-  }
   let viewerPhotos = photos;
   let selected = 0;
   let busy = false;
@@ -135,12 +112,15 @@
     gallery.querySelector('.guest-summary').textContent = photos.length ? 'Select a photo to view or download the original.' : 'No guest photos yet. Be the first to share one!';
     if (window.setGuestCarouselPhotos) window.setGuestCarouselPhotos(photos);
   }
+  let refreshVersion = 0;
   async function refresh() {
+    const version = ++refreshVersion;
     try {
       const response = await fetch(apiBase + 'api/gallery.php?device_id=' + encodeURIComponent(deviceId), { cache: 'no-store' });
       if (!response.ok) throw new Error('Gallery unavailable');
       const data = await response.json();
       if (!Array.isArray(data.photos)) throw new Error('Invalid gallery');
+      if (version !== refreshVersion) return;
       photos = data.photos.map(photo => ({
         ...photo,
         src: new URL(photo.src, apiBase).href,
@@ -148,6 +128,7 @@
       }));
       render();
     } catch (_) {
+      if (version !== refreshVersion) return;
       setStatus('Photos are temporarily unavailable. Please try again.');
       gallery.querySelector('.guest-summary').textContent = 'Photos are temporarily unavailable. Close and try again.';
     }
@@ -199,8 +180,7 @@
     const image = viewer.querySelector('img');
     resetZoom();
     viewer.classList.remove('controls-hidden');
-    if (photo.builtIn) image.removeAttribute('src');
-    else image.src = photo.previewSrc;
+    image.src = photo.previewSrc || photo.src;
     image.alt = photo.alt || 'Guest photo ' + (index + 1);
     viewer.querySelector('.guest-position').textContent = (index + 1) + ' / ' + viewerPhotos.length;
     viewer.querySelector('.guest-download').href = photo.builtIn ? photo.src : photo.src + '&download=1';
@@ -209,14 +189,6 @@
     viewer.querySelector('[data-retry]').hidden = true;
     viewer.querySelector('.guest-viewer-status').textContent = 'Loading full-size photo…';
     if (!viewer.open) viewer.showModal();
-    if (photo.builtIn) {
-      getBuiltInCrop(index).then(src => {
-        if (version === imageVersion && viewer.open) { image.src = src; viewer.querySelector('.guest-viewer-status').textContent = ''; }
-      }).catch(() => {
-        if (version === imageVersion && viewer.open) { viewer.querySelector('.guest-viewer-status').textContent = 'Could not load the photo.'; viewer.querySelector('[data-retry]').hidden = false; }
-      });
-      return;
-    }
     const full = new Image();
     full.onload = () => { if (version === imageVersion && viewer.open) { image.src = photo.src; viewer.querySelector('.guest-viewer-status').textContent = ''; } };
     full.onerror = () => { if (version === imageVersion && viewer.open) { viewer.querySelector('.guest-viewer-status').textContent = 'Could not load the full-size photo.'; viewer.querySelector('[data-retry]').hidden = false; } };
@@ -355,4 +327,10 @@
     input.value = '';
   });
   refresh();
+  const stage = document.getElementById('stage');
+  let inView = false;
+  new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; }).observe(stage);
+  setInterval(() => {
+    if (inView && !document.hidden && !busy) refresh();
+  }, 30000);
 })();
