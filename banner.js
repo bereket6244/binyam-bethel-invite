@@ -64,54 +64,78 @@
       return speed >= 1.8 ? 'medium' : 'low';
     }
 
-    async function load(state, quality, part) {
+    function best(state, part) {
+      return ['high', 'medium', 'low'].find(level => state.sheets[level + part]);
+    }
+
+    function load(state, quality, part, download = true) {
       const key = quality + part;
-      if (state.pending.has(key) || state.sheets[key]) return;
-      state.pending.add(key);
-      try {
-        const sheet = await loadSheet(mediaRoot + state.language + '-' + quality + '-' + part + '.webp',
-          state.controller.signal, () => quality === 'low' || quality === targetQuality(state));
-        if (!sheet || state !== session) return;
-        state.sheets[key] = sheet.image;
-        if (sheet.mbps) state.mbps = sheet.mbps;
-        render();
-      } catch (_) { /* Keep the poster or the last available frame on screen. */ }
-      finally { state.pending.delete(key); }
+      if (state.sheets[key] || state !== session) return;
+      if (state.pending.has(key)) return state.pending.get(key);
+      const task = loadSheet(mediaRoot + state.language + '-' + quality + '-' + part + '.webp',
+        state.controller.signal, () => download && state === session)
+        .then(sheet => {
+          if (!sheet || state !== session) return;
+          state.sheets[key] = sheet.image;
+          if (sheet.mbps) state.mbps = sheet.mbps;
+          render();
+        }).catch(() => {}).finally(() => state.pending.delete(key));
+      state.pending.set(key, task);
+      return task;
+    }
+
+    async function startPart(state, part) {
+      // An earlier visit may have saved HD even if today's connection is slow.
+      for (const quality of ['high', 'medium']) {
+        await load(state, quality, part, false);
+        if (state !== session || state.sheets[quality + part]) return;
+      }
+      await load(state, 'low', part);
     }
 
     async function prepare(state) {
-      await load(state, 'low', 0);
-      if (state !== session || !state.sheets.low0) return;
-      if (!state.hold) await load(state, 'low', 1);
-      await pageLoaded;
+      if (state.preparing) return;
+      state.preparing = true;
+      try {
+        await startPart(state, 0);
+        if (state !== session || !best(state, 0)) return;
+        if (!state.hold) await startPart(state, 1);
+        await pageLoaded;
+      } finally { state.preparing = false; }
       if (state === session) upgrade(state);
     }
 
     async function upgrade(state) {
-      if (!state || motion.matches || !visible || document.hidden || !state.sheets.low0 || network?.saveData) return;
-      const quality = targetQuality(state);
-      // Try a previously saved sharper sheet without downloading on a slow connection.
-      const preferred = quality === 'low' ? 'medium' : quality;
-      await load(state, preferred, 0);
-      if (state === session && !state.hold && state.sheets[preferred + '0']) await load(state, preferred, 1);
-      if (preferred === 'medium' && state === session && targetQuality(state) === 'high') {
-        await load(state, 'high', 0);
-        if (!state.hold && state === session && state.sheets.high0) await load(state, 'high', 1);
-      }
+      if (!state || state.upgrading || state.preparing || motion.matches || !visible || document.hidden ||
+          network?.saveData || !best(state, 0) || /^(slow-2g|2g)$/.test(network?.effectiveType || '')) return;
+      const parts = state.hold ? [0] : [0, 1];
+      const preferred = targetQuality(state);
+      const age = performance.now() - state.started;
+      // Once playback is buffered, progressively warm the sharper sheets at low network priority.
+      const next = preferred === 'high' || age >= 30000 ? 'high' :
+        preferred === 'medium' || age >= 12000 ? 'medium' : 'low';
+      state.upgrading = true;
+      try {
+        for (const part of parts) {
+          if (state !== session || !visible || document.hidden || network?.saveData) break;
+          if (best(state, part) === 'high' || state.sheets[next + part]) continue;
+          await load(state, next, part);
+        }
+      } finally { state.upgrading = false; }
     }
 
     function render() {
       clearTimeout(timer);
       const state = session;
-      if (!state?.sheets.low0 || document.hidden || !visible) return;
+      if (!state || !best(state, 0) || document.hidden || !visible) return;
       const now = performance.now();
       if (state.lastTime !== null) state.time += now - state.lastTime;
       state.lastTime = now;
       if (state.hold) state.time = Math.min(state.time, 3000);
-      else if (!state.sheets.low1) state.time = Math.min(state.time, 8000);
+      else if (!best(state, 1)) state.time = Math.min(state.time, 8000);
       else state.time %= 16000;
-      const part = state.time >= 8000 && !!state.sheets.low1 ? 1 : 0;
-      const quality = ['high', 'medium', 'low'].find(level => state.sheets[level + part]);
+      const part = state.time >= 8000 && !!best(state, 1) ? 1 : 0;
+      const quality = best(state, part);
       const {width, height, fps} = tier[quality];
       const partTime = state.time - part * 8000;
       const i = Math.min(3 * fps, Math.floor(partTime * fps / 1000));
@@ -138,7 +162,7 @@
       session?.controller.abort();
       clearTimeout(timer);
       session = {language, hold, still: motion.matches, time: 0, lastTime: null, mbps: 0,
-        controller: new AbortController(), sheets: {}, pending: new Set(), drawn: ''};
+        controller: new AbortController(), sheets: {}, pending: new Map(), started: performance.now(), drawn: ''};
       poster.src = mediaRoot + language + '-poster.webp';
       poster.style.visibility = '';
       canvas.hidden = true;
@@ -152,6 +176,11 @@
       if (visible && !document.hidden) upgrade(session);
     }
     configure();
+    setInterval(() => {
+      if (!session || motion.matches || !visible || document.hidden) return;
+      if (!best(session, 0) || (!session.hold && !best(session, 1))) prepare(session);
+      else if (!session.sheets.high0 || (!session.hold && !session.sheets.high1)) upgrade(session);
+    }, 6000);
     new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; activity(); }).observe(frame);
     new ResizeObserver(configure).observe(frame);
     mobile.addEventListener('change', configure);

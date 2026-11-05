@@ -1,4 +1,4 @@
-const CACHE_NAME = 'binyam-bethel-50efbd6b9f4b744dbb8d87fb1916be932b8824d7';
+const CACHE_NAME = 'binyam-bethel-0256be29334aa953047fdfcbc4cdb07d9e29c363';
 const PRECACHE = [];
 
 self.addEventListener('install', event => {
