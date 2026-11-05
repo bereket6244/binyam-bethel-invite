@@ -194,8 +194,15 @@
     full.onerror = () => { if (version === imageVersion && viewer.open) { viewer.querySelector('.guest-viewer-status').textContent = 'Could not load the full-size photo.'; viewer.querySelector('[data-retry]').hidden = false; } };
     full.src = photo.src;
   }
-  window.openGuestPhoto = index => showPhoto(index, photos);
-  window.openBuiltInPhoto = index => showPhoto(index, builtInPhotos);
+  window.openCarouselPhoto = slide => {
+    const elements = Array.from(document.querySelectorAll('#stage .slide'));
+    const guestById = new Map(photos.map(photo => [photo.id, photo]));
+    const portraitBySrc = new Map(builtInPhotos.map(photo => [photo.src, photo]));
+    const collection = elements.map(el => el.dataset.full
+      ? portraitBySrc.get(el.dataset.full) : guestById.get(el.dataset.guestId));
+    const index = elements.indexOf(slide);
+    if (index >= 0 && collection[index]) showPhoto(index, collection);
+  };
   window.openFullGuestGallery = () => { refresh(); gallery.showModal(); };
   openButton.addEventListener('click', event => { event.preventDefault(); window.openFullGuestGallery(); });
   gallery.querySelector('[data-close]').addEventListener('click', () => gallery.close());
