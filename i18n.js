@@ -12,13 +12,13 @@
     'Date': 'ቀን',
     'Vow ceremony': 'የቃል ኪዳን ሥነ ሥርዓት',
     'Church': 'ቤተ ክርስቲያን',
-    'Reception': 'የሰርግ ግብዣ',
+    'Reception': 'የእራት ፕሮግራም',
     '2:00 PM': 'ከቀኑ 8፡00 ሰዓት',
     'Naflet Hotel Addis': 'ናፍሌት ሆቴል አዲስ',
     'Church directions': 'የቤተ ክርስቲያኑን አድራሻ ይመልከቱ',
     'Reception directions': 'የእራት ፕሮግራም አድራሻ ይመልከቱ',
-    'Binyam & Bethel | Wedding': 'ቢንያም እና ቤቴል | ሰርግ',
-    'Celebrate the wedding of Binyam and Bethel.': 'የቢንያምን እና የቤቴልን ሰርግ አብረን እናክብር።',
+    'Binyam & Bethel | Wedding': 'ቢንያም እና ቤቴል | ሠርግ',
+    'Celebrate the wedding of Binyam and Bethel.': 'የቢንያምን እና የቤቴልን ሠርግ አብረን እናክብር።',
     'Binyam and Bethel': 'ቢንያም እና ቤቴል',
     'Binyam and Bethel holding hands and smiling at each other under a rose-covered arch': 'ቢንያም እና ቤቴል በጽጌረዳ በተሸለመው ቅስት ሥር እጅ ለእጅ ተያይዘው ሲስቁ',
     'Binyam': 'ቢንያም',
@@ -28,7 +28,7 @@
     'Dr. Binyam Markos': 'ዶ/ር ቢንያም ማርቆስ',
     'Bethel Elias': 'ቤቴል ኤልያስ',
     'Dr. Binyam Markos & Bethel Elias': 'ዶ/ር ቢንያም ማርቆስ እና ቤቴል ኤልያስ',
-    'joyfully invite you to celebrate their wedding.': 'የሰርግ ሥነ ሥርዓት ላይ እንዲገኙልን በአክብሮት ተጠርተዋል።',
+    'joyfully invite you to celebrate their wedding.': 'የሠርግ ሥነ ሥርዓት ላይ እንዲገኙልን በአክብሮት ተጠርተዋል።',
     'The details': 'መቼ እና የት',
     'When': 'መቼ',
     '21 November 2026': 'ቅዳሜ ኅዳር 12 ቀን፣ 2019 ዓ.ም',
@@ -174,7 +174,7 @@
     const calendar = document.getElementById('calBtn');
     if (calendar?.href.includes('calendar.google.com')) {
       const url = new URL(calendar.href);
-      url.searchParams.set('text', language === 'am' ? 'የቢንያም እና የቤቴል ሰርግ' : 'Binyam & Bethel Wedding');
+      url.searchParams.set('text', language === 'am' ? 'የቢንያም እና የቤቴል ሠርግ' : 'Binyam & Bethel Wedding');
       url.searchParams.set('location', language === 'am' ? am['Living Way Church'] + '፣ አዲስ አበባ' : 'Living Way Church, Addis Ababa, Ethiopia');
       url.searchParams.set('details', language === 'am' ? 'ሥነ ሥርዓቱ በሕያው መንገድ ቤተክርስቲያን ከቀኑ 8 ሰዓት፣ የእራት ግብዣው በናፍሌት ሆቴል አዲስ ከምሽቱ 12 ሰዓት ይካሄዳል።' : 'Church at 2:00 PM at Living Way Church. Reception at 6:00 PM at Naflet Hotel Addis.');
       if (calendar.href !== url.href) calendar.href = url.href;
