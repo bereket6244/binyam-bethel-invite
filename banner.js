@@ -2,7 +2,8 @@
   'use strict';
 
   const mediaRoot = 'https://bereket6244.github.io/binyam-bethel-invite/video/birds-v1/';
-  const mediaCache = 'wedding-birds-v1';
+  const mediaCache = 'wedding-birds-v2';
+  try { if (typeof caches !== 'undefined') caches.delete('wedding-birds-v1'); } catch (_) {}
   const tier = {
     low: {width: 280, height: 120, fps: 8},
     medium: {width: 490, height: 210, fps: 8},
@@ -72,7 +73,7 @@
       const key = quality + part;
       if (state.sheets[key] || state !== session) return;
       if (state.pending.has(key)) return state.pending.get(key);
-      const task = loadSheet(mediaRoot + state.language + '-' + quality + '-' + part + '.webp',
+      const task = loadSheet(mediaRoot + state.language + '-' + quality + '-' + part + '.webp?v=v2',
         state.controller.signal, () => download && state === session)
         .then(sheet => {
           if (!sheet || state !== session) return;

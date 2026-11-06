@@ -16,19 +16,19 @@
     '2:00 PM': 'ከቀኑ 8፡00 ሰዓት',
     'Naflet Hotel Addis': 'ናፍሌት ሆቴል አዲስ',
     'Church directions': 'የቤተ ክርስቲያኑን አድራሻ ይመልከቱ',
-    'Reception directions': 'የግብዣውን አድራሻ ይመልከቱ',
-    'Binyam & Bethel | Wedding': 'ቢንያም እና ቤተል | ሰርግ',
-    'Celebrate the wedding of Binyam and Bethel.': 'የቢንያምን እና የቤተልን ሰርግ አብረን እናክብር።',
-    'Binyam and Bethel': 'ቢንያም እና ቤተል',
-    'Binyam and Bethel holding hands and smiling at each other under a rose-covered arch': 'ቢንያም እና ቤተል በጽጌረዳ በተሸለመው ቅስት ሥር እጅ ለእጅ ተያይዘው ሲስቁ',
+    'Reception directions': 'የእራት ፕሮግራም አድራሻ ይመልከቱ',
+    'Binyam & Bethel | Wedding': 'ቢንያም እና ቤቴል | ሰርግ',
+    'Celebrate the wedding of Binyam and Bethel.': 'የቢንያምን እና የቤቴልን ሰርግ አብረን እናክብር።',
+    'Binyam and Bethel': 'ቢንያም እና ቤቴል',
+    'Binyam and Bethel holding hands and smiling at each other under a rose-covered arch': 'ቢንያም እና ቤቴል በጽጌረዳ በተሸለመው ቅስት ሥር እጅ ለእጅ ተያይዘው ሲስቁ',
     'Binyam': 'ቢንያም',
-    'Bethel': 'ቤተል',
+    'Bethel': 'ቤቴል',
     '&': 'እና',
     'Together with their families,': 'ከቤተሰቦቻቸው ጋር፣',
     'Dr. Binyam Markos': 'ዶ/ር ቢንያም ማርቆስ',
-    'Bethel Elias': 'ቤተል ኤልያስ',
-    'Dr. Binyam Markos & Bethel Elias': 'ዶ/ር ቢንያም ማርቆስ እና ቤተል ኤልያስ',
-    'joyfully invite you to celebrate their wedding.': 'የሰርግ ስነ ስርዓት እንዲገኙልን በአክብሮት ተጠርተዋል።',
+    'Bethel Elias': 'ቤቴል ኤልያስ',
+    'Dr. Binyam Markos & Bethel Elias': 'ዶ/ር ቢንያም ማርቆስ እና ቤቴል ኤልያስ',
+    'joyfully invite you to celebrate their wedding.': 'የሰርግ ሥነ ሥርዓት ላይ እንዲገኙልን በአክብሮት ተጠርተዋል።',
     'The details': 'መቼ እና የት',
     'When': 'መቼ',
     '21 November 2026': 'ቅዳሜ ኅዳር 12 ቀን፣ 2019 ዓ.ም',
@@ -45,7 +45,7 @@
     'Photos are temporarily unavailable. Please try again.': 'ፎቶዎች ለጊዜው አይገኙም። እንደገና ይሞክሩ።',
     'Photo gallery': 'የፎቶ ማዕከል',
     'The couple under the rose arch': 'ጥንዶቹ በጽጌረዳ በተሸለመው ቅስት ሥር',
-    'Bethel smiling': 'ቤተል ሲስቅ',
+    'Bethel smiling': 'ቤቴል ስትስቅ',
     'Binyam smiling': 'ቢንያም ስትስቅ',
     'Holding hands': 'እጅ ለእጅ ተያይዘው',
     'Will you marry me': 'ታገቢኛለሽ?',
@@ -55,7 +55,7 @@
     'Next photo': 'ቀጣዩ ፎቶ',
     'View full gallery': 'ሙሉ ጋለሪውን ይመልከቱ',
     'With love,': 'በፍቅር፣',
-    'With love, Binyam and Bethel': 'በፍቅር፣ ቢንያም እና ቤተል',
+    'With love, Binyam and Bethel': 'በፍቅር፣ ቢንያም እና ቤቴል',
     'Play background music': 'የጀርባ ሙዚቃውን አጫውት',
     'Pause background music': 'የጀርባ ሙዚቃውን አቁም',
     'Our shared memories': 'የጋራ ትዝታዎቻችን',
@@ -174,7 +174,7 @@
     const calendar = document.getElementById('calBtn');
     if (calendar?.href.includes('calendar.google.com')) {
       const url = new URL(calendar.href);
-      url.searchParams.set('text', language === 'am' ? 'የቢንያም እና የቤተል ሰርግ' : 'Binyam & Bethel Wedding');
+      url.searchParams.set('text', language === 'am' ? 'የቢንያም እና የቤቴል ሰርግ' : 'Binyam & Bethel Wedding');
       url.searchParams.set('location', language === 'am' ? am['Living Way Church'] + '፣ አዲስ አበባ' : 'Living Way Church, Addis Ababa, Ethiopia');
       url.searchParams.set('details', language === 'am' ? 'ሥነ ሥርዓቱ በሕያው መንገድ ቤተክርስቲያን ከቀኑ 8 ሰዓት፣ የእራት ግብዣው በናፍሌት ሆቴል አዲስ ከምሽቱ 12 ሰዓት ይካሄዳል።' : 'Church at 2:00 PM at Living Way Church. Reception at 6:00 PM at Naflet Hotel Addis.');
       if (calendar.href !== url.href) calendar.href = url.href;

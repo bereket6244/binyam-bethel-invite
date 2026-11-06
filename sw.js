@@ -1,4 +1,4 @@
-const CACHE_NAME = 'binyam-bethel-5a8ba818418dd909aeae9cc7e2f3d76c376803b7';
+const CACHE_NAME = 'binyam-bethel-4939a6f3b781991421be3a3e8f19bdfc6e1424ec';
 const PRECACHE = [];
 
 self.addEventListener('install', event => {
@@ -8,19 +8,21 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key.startsWith('binyam-bethel-') && key !== CACHE_NAME).map(key => caches.delete(key)));
+    await Promise.all(keys.map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  // Never intercept or cache requests during local development
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
   if (url.pathname.includes('/api/') || /\/video\/birds-v\d+\/[^/]+-(?:high|medium|low)-[01]\.webp$/.test(url.pathname)) return;
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    const key = event.request.mode === 'navigate' ? 'index.html' : event.request;
+    const key = event.request.mode === 'navigate' ? (url.pathname.endsWith('/am.html') ? 'am.html' : 'index.html') : event.request;
     const cached = await cache.match(key);
     if (event.request.mode === 'navigate') {
       try {
