@@ -28,7 +28,7 @@
     'Dr. Binyam Markos': 'ዶ/ር ቢንያም ማርቆስ',
     'Bethel Elias': 'ቤቴል ኤልያስ',
     'Dr. Binyam Markos & Bethel Elias': 'ዶ/ር ቢንያም ማርቆስ እና ቤቴል ኤልያስ',
-    'joyfully invite you to celebrate their wedding.': 'የሠርግ ሥነ ሥርዓት ላይ እንዲገኙልን በአክብሮት ተጠርተዋል።',
+    'joyfully invite you to celebrate their wedding.': 'የሠርግ ሥነ ሥርዓት ላይ እንዲገኙ በአክብሮት ጠርተዎታል።',
     'The details': 'መቼ እና የት',
     'When': 'መቼ',
     '21 November 2026': 'ቅዳሜ ኅዳር 12 ቀን፣ 2019 ዓ.ም',
